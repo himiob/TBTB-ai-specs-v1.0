@@ -1,0 +1,386 @@
+# Backend Standards – TBTB Global (v1.0)
+
+## 1. Objetivo
+
+Definir los lineamientos, convenciones y estándares técnicos que deben cumplirse en toda implementación backend dentro de TBTB Global, incluyendo desarrollos asistidos por Inteligencia Artificial mediante Cursor, Claude u otras herramientas.
+
+Estos estándares son **obligatorios**, no sugeridos, y aplican a todos los proyectos internos y para clientes donde exista desarrollo backend.
+
+---
+
+## 2. Lenguaje y Frameworks Permitidos
+
+### 2.1. Lenguaje primario
+
+- **TypeScript** (obligatorio para nuevos proyectos)
+- JavaScript solo se permite en proyectos heredados y debe migrarse progresivamente a TypeScript.
+
+### 2.2. Frameworks backend aprobados
+
+- **Node.js** como entorno de ejecución.
+- **NestJS** como framework principal recomendado.
+- **Express** solo si existe justificación técnica (microservicios simples, migraciones heredadas).
+- **Fastify** solo para servicios de alta performance si es aprobado por el Tech Lead.
+
+### 2.3. Librerías aprobadas (ejemplos)
+
+- Validación: `zod`, `class-validator`, `joi`
+- ORM / acceso a datos: `prisma`, `sequelize`, `typeorm` (según proyecto)
+- HTTP Client: `axios`, `node-fetch`
+- Autenticación / seguridad: `jsonwebtoken`, `bcrypt`, `argon2`
+- Fechas: `date-fns`, `luxon`
+
+### 2.4. Librerías o prácticas prohibidas
+
+- Uso indiscriminado de `any` en TypeScript.
+- Dependencias sin tipado cuando existan alternativas tipadas.
+- Frameworks backend no aprobados sin revisión técnica.
+- Código JavaScript sin typings en proyectos nuevos.
+
+---
+
+## 3. Estructura de Carpetas
+
+Todos los proyectos backend deben seguir una estructura coherente y modular:
+
+```txt
+src/
+  modules/
+    <modulo>/
+      controllers/
+      services/
+      repositories/
+      dtos/
+      entities/
+      mappers/
+      tests/
+  config/
+  middlewares/
+  utils/
+  common/
+  database/
+    migrations/
+
+Reglas generales
+	•	Ningún archivo debe quedar “sueltos” en src/ fuera de la estructura definida.
+	•	Evitar módulos genéricos como misc, helpers o others para no esconder lógica.
+	•	Los módulos no deben depender directamente entre sí de forma circular.
+	•	Debe mantenerse una clara separación entre:
+	•	lógica de negocio (services)
+	•	acceso a datos (repositories)
+	•	transporte (controllers/DTOs)
+
+⸻
+
+4. Arquitectura Estándar del Backend
+
+4.1. Capas obligatorias
+	•	Controller
+	•	Recibe la petición.
+	•	Valida datos de entrada (a nivel de estructura, no de negocio).
+	•	Delegará la ejecución a servicios.
+	•	Arma la respuesta HTTP.
+	•	Service
+	•	Contiene la lógica de negocio.
+	•	Coordina interacción entre repositorios, otros servicios y eventos.
+	•	Repository
+	•	Maneja interacción con la base de datos u otras fuentes de datos.
+	•	No debe contener lógica de negocio.
+	•	DTOs (Data Transfer Objects)
+	•	Definen el contrato de entrada y salida de los endpoints.
+	•	Evitan exponer directamente las entidades internas.
+	•	Entities / Domain Models
+	•	Representan el dominio de negocio.
+	•	Pueden incluir lógica de dominio simple (invariantes).
+	•	Mappers
+	•	Transforman datos entre:
+	•	request → DTO
+	•	DTO → entity
+	•	entity → response
+
+4.2. Prácticas prohibidas
+	•	Lógica de negocio en controladores.
+	•	Acceso directo a la base de datos desde controladores o servicios sin repositorios.
+	•	Lógica compleja en repositorios.
+	•	Mezclar preocupación de dominio con detalles de infraestructura.
+
+
+⸻
+
+5. DTOs y Validación
+
+5.1. Uso obligatorio de DTOs
+
+Cada endpoint debe contar con sus DTO de entrada y salida:
+	•	create-<resource>.dto.ts
+	•	update-<resource>.dto.ts
+	•	filter-<resource>.dto.ts (si aplica)
+
+5.2. Validación
+	•	La validación de estructura se hará con class-validator, zod o herramienta definida por el proyecto.
+	•	La validación de reglas de negocio se realiza en los servicios, no en los DTOs.
+	•	Los mensajes de error deben ser claros y consistentes, sin exponer detalles internos.
+
+⸻
+
+6. Reglas para Controladores (Controllers)
+	•	Deben ser lo más finos posible:
+	  •	recibir request
+	  •	validar DTOs
+	  •	delegar a servicios
+	  •	devolver respuestas
+	•	Nunca deben contener:
+	  •	lógica de negocio
+	  •	lógica compleja de transformación de datos
+	  •	acceso directo a la base de datos
+	•	Las respuestas deben seguir una estructura estándar:
+{
+  "success": true,
+  "data": {},
+  "error": null
+}
+	•	En caso de error:
+{
+  "success": false,
+  "data": null,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Mensaje legible para el cliente"
+  }
+}
+	•	Prohibido usar res.send directo en frameworks que no lo requieren
+	•	Nunca exponer errores internos
+
+⸻
+
+7. Reglas para Servicios (Services)
+
+7.1. La lógica vive aquí
+
+Incluye:
+	•	Procesos
+	•	Validaciones de negocio
+	•	Coordinación con repositorios
+
+7.2. Servicios deben ser puros cuando sea posible
+
+Evitar efectos colaterales innecesarios.
+
+7.3. Prohibido
+	•	Acceder a datos directamente
+	•	Modificar datos sin validación previa
+	•	Llamar APIs externas sin wrapper interno
+
+⸻
+
+8. Reglas para Repositorios (Repositories)
+	•	Cada entidad o agregado principal debe tener su repositorio.
+	•	Los repositorios manejan:
+	  •	creación
+	  •	actualización
+	  •	eliminación
+	    •	búsqueda y paginación
+	•	Deben usar ORM o clientes de base de datos aprobados por el proyecto.
+	•	No deben contener validaciones de negocio.
+	•	Devuelven entidades o DTOs específicos según el diseño del módulo.
+
+⸻
+
+9. Entities / Domain Models
+
+Las entidades deben representar correctamente el dominio y cumplir:
+	•	Llevar solo los campos necesarios.
+	•	Incluir invariantes y restricciones simples (cuando aplique).
+	•	No contener dependencias directas de infraestructura.
+
+Regla importante:
+	•	Nunca devolver entidades “crudas” directamente a la capa de respuesta.
+	•	Siempre transformar las entidades a modelos de respuesta o DTOs de salida.
+
+⸻
+
+10. API Standards
+
+10.1. Versionado de API
+	•	Las rutas deben estar versionadas:
+	•	/api/v1/...
+	•	Un cambio incompatible debe implicar nueva versión (/v2, /v3, etc.).
+
+10.2. Convención de rutas
+
+Convención recomendada:
+	•	GET /resource → listar recursos
+	•	GET /resource/:id → obtener recurso
+	•	POST /resource → crear recurso
+	•	PUT /resource/:id → actualizar recurso completo
+	•	PATCH /resource/:id → actualizar parcialmente
+	•	DELETE /resource/:id → eliminar recurso
+
+10.3. Códigos de respuesta HTTP
+	•	200 – OK
+	•	201 – Creado
+	•	204 – Sin contenido
+	•	400 – Error de validación / petición incorrecta
+	•	401 – No autenticado
+	•	403 – No autorizado
+	•	404 – No encontrado
+	•	409 – Conflicto de estado
+	•	422 – Error semántico en datos
+	•	500 – Error interno del servidor
+
+
+⸻
+
+11. Seguridad
+
+Toda implementación debe cumplir security-standards.mdc.
+
+Puntos clave:
+	•	Sanitización de inputs
+	•	Auth obligatoria (JWT o token interno)
+	•	Rate limiting donde aplique
+	•	Prohibido exponer:
+	•	datos médicos
+	•	datos sensibles
+	•	tokens
+	•	logs con información privada
+
+⸻
+
+12. Logging
+	•	Nunca loggear información personal
+	•	Logs deben ser estructurados
+	•	Formato:
+
+{
+  "timestamp": "2025-01-01T12:00:00Z",
+  "level": "info",
+  "message": "Patient created successfully",
+  "module": "patients",
+  "context": {
+    "userId": "xxx",
+    "requestId": "yyy"
+  }
+}
+
+	•	console.log prohibido en producción
+
+⸻
+
+13. Uso de IA en Backend (reglas obligatorias)
+
+13.1. La IA NO puede:
+	•	modificar modelos sin aprobación
+	•	crear endpoints no definidos en api-spec.yml
+	•	cambiar lógica de negocio
+	•	agregar dependencias no aprobadas
+
+13.2. La IA debe:
+	•	seguir estrictamente ai-specs
+	•	generar tests
+	•	documentar impactos
+	•	sugerir riesgos antes de cambios
+
+⸻
+
+14. Pruebas (Testing)
+
+14.1. Cobertura mínima
+	•	85% obligatorio
+
+14.2. Tipos de pruebas
+	•	Unit tests
+	•	Integration tests
+	•	Mocks para servicios externos
+
+14.3. Todo PR debe incluir tests
+
+14.4. Estructura de tests
+src/
+  modules/
+    <modulo>/
+      tests/
+        unit/
+        integration/
+
+No se aprueban PRs sin tests asociados.
+
+⸻
+
+15. Migrations
+	•	Cada cambio en la base de datos debe tener migración
+	•	Formato de nombre:
+YYYYMMDD_HHMM_description.sql
+	•	Migraciones deben ser reversibles
+	•	Las migraciones deben incluir:
+	•	script de creación
+	•	script de reversión (rollback) cuando sea posible
+	•	Nunca modificar migraciones ya ejecutadas en entornos productivos.
+
+
+⸻
+
+16. Performance y Escalabilidad
+
+Buenas prácticas obligatorias:
+	•	Paginación en endpoints que devuelvan listados grandes.
+	•	Evitar N+1 queries.
+	•	Uso de índices en campos consultados frecuentemente.
+	•	Evitar operaciones complejas dentro de bucles (usar operaciones en lote).
+	•	Considerar cache cuando aplique (Redis u otro mecanismo aprobado).
+
+⸻
+
+17. Manejo de Errores
+
+	•	Implementar una clase base de errores de aplicación:
+class AppError extends Error {
+  statusCode: number;
+  code: string;
+  constructor(message: string, code: string, statusCode: number) {
+    super(message);
+    this.code = code;
+    this.statusCode = statusCode;
+  }
+}
+
+No exponer errores internos a respuestas públicas.
+
+⸻
+
+18. Versionamiento del API
+	•	Cualquier cambio incompatible debe implementarse en una nueva versión del API (/v2, /v3).
+	•	Cambios menores y compatibles pueden mantenerse en la misma versión.
+	•	Toda modificación de endpoints debe reflejarse en api-spec.yml.
+	•	Documentar cambios en CHANGELOG del proyecto.
+
+
+⸻
+
+19. Gobernanza
+
+	•	Cualquier cambio a este documento (backend-standards.mdc) debe:
+	  •	Ser propuesto mediante Pull Request en el repositorio de ai-specs.
+	  •	Contar con revisión y aprobación del Tech Lead.
+	  •	Contar con revisión y aprobación de la Gerente de Tecnología & Data.
+  	•	Ser registrado en el archivo CHANGELOG.md.
+
+
+⸻
+
+20. Consistencia entre proyectos
+	•	Todos los proyectos backend de TBTB deben cumplir este estándar.
+	•	Las excepciones deben:
+  	•	estar documentadas,
+	  •	ser aprobadas explícitamente,
+	  • tener justificación técnica.
+	  •	Los agentes de IA (Cursor, Claude, etc.) deben configurarse para utilizar este documento como referencia principal en la generación de código backend.
+
+
+─────────────────────────────────────
+
+FIN DEL ARCHIVO backend-standards.mdc
+
+
+
+O seguimos con architecture-overview / api-spec / prompts / refactor-plan?
