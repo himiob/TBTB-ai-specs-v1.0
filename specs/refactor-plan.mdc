@@ -1,0 +1,324 @@
+# Refactor Plan – TBTB Global (v1.0)
+
+## 1. Objetivo
+
+Establecer el proceso oficial y la plantilla corporativa para realizar **refactorizaciones seguras y controladas** dentro de TBTB Global.  
+Este documento garantiza que tanto desarrolladores como herramientas de Inteligencia Artificial (Cursor/Claude) ejecuten refactors:
+
+- sin romper funcionalidades existentes  
+- alineados con ai-specs  
+- con trazabilidad completa  
+- sin cambios inesperados  
+- sin alterar arquitectura  
+- sin introducir riesgos de seguridad  
+- sin modificar contratos API o modelos de datos sin aprobación
+
+Ningún refactor puede realizarse sin un **Refactor Plan** aprobado.
+
+---
+
+## 2. ¿Cuándo se permite un refactor?
+
+Se permite cuando:
+
+1. Existen duplicaciones evidentes.  
+2. Hay deuda técnica acumulada.  
+3. El código es difícil de mantener.  
+4. El módulo presenta inconsistencias con ai-specs.  
+5. La IA ha generado código redundante.  
+6. Existen problemas de performance.  
+7. Se identifican riesgos de seguridad por diseño.  
+8. Se necesita adaptar la arquitectura a un nuevo módulo.  
+9. QA o Tech Lead lo solicitan.
+
+No se permite un refactor si:
+
+- afecta directamente a una entrega crítica sin aprobación  
+- modifica modelos, BD o API sin justificación  
+- afecta a datos sensibles sin revisión  
+- no existen pruebas que validen comportamiento  
+- el riesgo de regresión es alto
+
+---
+
+## 3. Reglas Generales para Refactors
+
+### 3.1. **Prohibido cambiar la arquitectura**
+La IA nunca puede:
+
+- mover módulos  
+- renombrar estructuras  
+- cambiar patrones  
+- inventar carpetas nuevas  
+- fusionar módulos de dominios distintos
+
+Ver `architecture-overview.md`.
+
+---
+
+### 3.2. **Prohibido cambiar contratos API**
+Sin actualizar:
+- `api-spec.yml`
+- documentación
+- frontend correspondiente
+
+---
+
+### 3.3. **Prohibido cambiar modelos de datos**
+Sin revisar:
+- `data-model.md`
+- migraciones
+- impacto en integraciones
+
+---
+
+### 3.4. **Se requieren tests previos**
+Antes del refactor:
+- tests existentes deben correr y pasar  
+- si no existen, deben crearse tests mínimos  
+
+---
+
+### 3.5. **Después del refactor**
+- los tests deben seguir pasando  
+- se agregan tests nuevos si hay lógica nueva
+
+---
+
+### 3.6. **Documentación obligatoria**
+Debe actualizar:
+
+- arquitectura (si aplica)  
+- docs del módulo  
+- changelog  
+
+---
+
+## 4. Flujo Corporativo del Refactor
+
+### **1️⃣ Identificación**
+El desarrollador identifica un problema:
+
+Ejemplos:
+- duplicación  
+- función muy larga  
+- código difícil de leer  
+- files demasiado grandes  
+- dependencia circular  
+- módulo fuera de ai-specs  
+- almacenamiento incorrecto de datos sensibles  
+
+Se registra en Jira con etiqueta:
+
+Refactor Needed
+
+---
+
+### **2️⃣ Elaboración del Refactor Plan**
+Se crea un archivo usando esta plantilla:
+
+/ai-specs/changes/RF-SCRUM-XXX-refactor-plan.md
+
+Incluye:
+- alcance  
+- exclusiones  
+- impacto  
+- riesgos  
+- pasos detallados  
+- archivos afectados  
+- pruebas necesarias  
+- documentación impactada  
+- validaciones IA  
+
+---
+
+### **3️⃣ Revisión del Tech Lead**
+El Tech Lead valida:
+
+- seguridad  
+- arquitectura  
+- compatibilidad  
+- impacto en otros módulos  
+- cumplimiento ai-specs  
+
+---
+
+### **4️⃣ Crear branch de refactor**
+
+feature/refactor/SCRUM-XXX
+
+---
+
+### **5️⃣ Desarrollo IA-first**
+La IA hace sugerencias claras únicamente siguiendo el plan.
+
+Reglas:
+
+- La IA NO decide qué refactorizar.  
+- La IA solo ejecuta pasos ya aprobados.  
+- La IA debe explicar cada cambio.  
+- La IA no puede eliminar lógica sin explicarlo.  
+- La IA no puede alterar tests sin justificación.  
+
+---
+
+### **6️⃣ Pruebas**
+El desarrollador:
+
+- corre backend  
+- corre frontend (si aplica)  
+- ejecuta tests  
+- valida que nada se rompió  
+- valida flujos críticos  
+
+---
+
+### **7️⃣ Revisión de PR**
+El reviewer confirma:
+
+- todo sigue funcionando  
+- no hay cambios inesperados  
+- no se alteraron contratos API  
+- no se alteró arquitectura  
+- no se afectó BD  
+- no se expusieron datos sensibles  
+- refactor mejora realmente el código  
+- documentación actualizada  
+- plan técnico se cumplió  
+
+---
+
+### **8️⃣ Merge**
+Si todo está correcto:
+
+- merge a `develop` o `main`  
+- actualizar CHANGELOG  
+
+---
+
+## 5. Plantilla Oficial (Copiar para cada refactor)
+
+Refactor Plan — RF-SCRUM-XXX
+
+1. Contexto
+
+(Describir el motivo: duplicación, complejidad, deuda técnica, riesgo, etc.)
+
+2. Problema Identificado
+	•	¿Qué está mal?
+	•	¿Qué riesgo representa?
+	•	¿Qué módulo(s) están afectados?
+
+3. Objetivo del Refactor
+
+(Clarificar qué se quiere lograr)
+
+4. Alcance (IN SCOPE)
+	•	Elementos incluidos en el refactor
+
+5. Exclusiones (OUT OF SCOPE)
+	•	Elementos que la IA NO debe tocar bajo ninguna circunstancia
+
+6. Impacto Técnico
+	•	módulos afectados
+	•	funciones afectadas
+	•	servicios impactados
+	•	repositorios
+	•	contratos API
+	•	base de datos
+	•	frontend
+	•	seguridad
+
+7. Riesgos del Refactor
+	•	riesgos de regresión
+	•	riesgos de API
+	•	riesgos de arquitectura
+	•	riesgos de seguridad
+
+8. Mitigaciones
+	•	qué pasos se tomarán para reducir riesgos
+
+9. Pasos Detallados (Paso a Paso)
+	1.	…
+	2.	…
+	3.	…
+
+La IA solo puede ejecutar estos pasos.
+
+10. Archivos Afectados
+	•	listar todos los archivos que se modificarán
+
+11. Pruebas Requeridas
+	•	unit tests
+	•	integration tests
+	•	flujo funcional
+	•	manejo de errores
+
+12. Validaciones Obligatorias
+	•	AI respetó arquitectura
+	•	AI no creó módulos nuevos
+	•	AI no modificó API sin autorización
+	•	seguridad intacta
+	•	code smells eliminados
+
+13. Documentación a Actualizar
+	•	API (si aplica)
+	•	Arquitectura
+	•	Modelos
+	•	CHANGELOG
+
+14. Aprobaciones
+	•	Tech Lead: …
+	•	Gerente Tech & Data (si aplica): …
+
+15. Resultado Final
+
+(Se completa al terminar el refactor)
+
+---
+
+## 6. Riesgos Específicos de Refactor (para IA)
+
+1. **Eliminar lógica sin entenderla**  
+2. **Cambiar firmas de funciones sin revisar impacto**  
+3. **Modificar nombres rompiendo imports**  
+4. **Reorganizar carpetas sin autorización**  
+5. **Tocar código fuera del scope**  
+6. **Remover validaciones críticas**  
+7. **Variar los contratos de API**  
+8. **Afectar modelos y BD**  
+9. **Duplicar código**  
+10. **Cortes accidentales en flujos funcionales**  
+
+---
+
+## 7. Gobernanza
+
+Cambios a este documento requieren:
+
+1. PR en ai-specs  
+2. Justificación técnica  
+3. Revisión del Tech Lead  
+4. Revisión de Gerente Tech & Data  
+5. Actualización del CHANGELOG  
+
+---
+
+## 8. Cumplimiento
+
+Este documento es obligatorio en:
+
+- backend  
+- frontend  
+- refactorizaciones  
+- correcciones críticas  
+- deuda técnica  
+- desarrollo IA-first  
+- proyectos de diagnóstico  
+- proyectos internos de TBTB  
+
+Cualquier excepción debe estar documentada y aprobada.
+
+---
+
+**Fin del documento — refactor-plan.mdc (v1.0)**
