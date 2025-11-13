@@ -1,0 +1,27 @@
+# Base Standards – TBTB Global
+
+## 1. Objetivo
+Establecer reglas técnicas generales que deben cumplirse sin excepción en todos los proyectos.
+
+## 2. Convenciones globales
+- Lenguaje primario: TypeScript
+- Arquitectura basada en módulos
+- Prohibido usar `any` sin justificación
+- Prohibido mezclar estilos inline en frontend
+- Nombres consistentes en camelCase/kebab-case
+- Patrones consistentes en todo el código base
+
+## 3. Manejo de errores
+- Toda función debe manejar errores explícitos
+- Prohibido capturar error y no registrarlo
+- Usar estructuras estandarizadas de error
+
+## 4. Logs
+- Prohibido loggear información sensible
+- Seguir lineamientos de `security-standards.mdc`
+
+## 5. Tests
+- Todos los cambios deben incluir tests asociados
+
+## 6. Consistencia IA
+Toda salida generada por IA debe ser validada contra estos estándares.
