@@ -1,0 +1,491 @@
+openapi: 3.0.3
+info:
+  title: TBTB Global API Specification
+  description: >
+    API base corporativa utilizada por todos los proyectos de TBTB Global.
+    Este documento actúa como contrato de comunicación entre el backend, el frontend y la IA.
+    Cualquier endpoint debe definirse aquí antes de implementarse.
+  version: "1.0.0"
+  contact:
+    name: TBTB Technology & Data
+    email: tech@tbtbglobal.com
+
+servers:
+  - url: https://api-dev.tbtbglobal.com
+    description: Development
+  - url: https://api.tbtbglobal.com
+    description: Production
+
+tags:
+  - name: Users
+  - name: Auth
+  - name: Patients
+  - name: Samples
+  - name: DiagnosticRequests
+  - name: DiagnosticTests
+  - name: Orders
+  - name: Notifications
+  - name: Health
+
+paths:
+
+  ###############################
+  # Health Check
+  ###############################
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        "200":
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  ###############################
+  # Authentication
+  ###############################
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      description: Authenticate a user and return access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  ###############################
+  # Users - Get My Profile
+  ###############################
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  ###############################
+  # Patients
+  ###############################
+  /patients:
+    get:
+      tags: [Patients]
+      summary: List patients (paginated)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search term (name/email/document)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Patients list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedPatients"
+
+    post:
+      tags: [Patients]
+      summary: Create patient
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatientCreateRequest"
+      responses:
+        "201":
+          description: Patient created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+
+  /patients/{id}:
+    get:
+      tags: [Patients]
+      summary: Get patient by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Patient retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+
+  ###############################
+  # Diagnostic Requests
+  ###############################
+  /diagnostic-requests:
+    post:
+      tags: [DiagnosticRequests]
+      summary: Create diagnostic request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiagnosticRequestCreate"
+      responses:
+        "201":
+          description: Diagnostic request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticRequest"
+
+  /diagnostic-requests/{id}:
+    get:
+      tags: [DiagnosticRequests]
+      summary: Get diagnostic request
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Diagnostic request details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticRequest"
+
+  ###############################
+  # Samples
+  ###############################
+  /samples:
+    post:
+      tags: [Samples]
+      summary: Register a sample
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SampleCreate"
+      responses:
+        "201":
+          description: Sample created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sample"
+
+  ###############################
+  # Diagnostic Tests
+  ###############################
+  /diagnostic-tests/{id}:
+    patch:
+      tags: [DiagnosticTests]
+      summary: Update diagnostic test result
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DiagnosticTestUpdate"
+      responses:
+        "200":
+          description: Test updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiagnosticTest"
+
+  ###############################
+  # Notifications
+  ###############################
+  /notifications:
+    post:
+      tags: [Notifications]
+      summary: Send notification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationCreate"
+      responses:
+        "201":
+          description: Notification queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+# ---------------------------------------------------------
+# COMPONENTS
+# ---------------------------------------------------------
+components:
+
+  ###############################
+  # SECURITY SCHEMES
+  ###############################
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  ###############################
+  # SCHEMAS (MODELS)
+  ###############################
+  schemas:
+
+    # Generic Models
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: INVALID_REQUEST
+            message:
+              type: string
+              example: The provided data is invalid.
+
+    # Auth
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    # Users
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string }
+        role:
+          type: string
+          enum: [admin, agent, doctor, coordinator, patient, system]
+        country: { type: string }
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+
+    # Patients
+    Patient:
+      type: object
+      properties:
+        id: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
+        documentType: { type: string }
+        documentNumber: { type: string }
+        birthDate: { type: string, format: date }
+        gender:
+          type: string
+          enum: [male, female, other, undisclosed]
+        country: { type: string }
+        city: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    PatientCreateRequest:
+      type: object
+      required: [firstName, lastName, country]
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        country: { type: string }
+        email: { type: string }
+        phone: { type: string }
+
+    PaginatedPatients:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Patient"
+        pagination:
+          type: object
+          properties:
+            page: { type: integer }
+            limit: { type: integer }
+            total: { type: integer }
+
+    # Diagnostic Requests
+    DiagnosticRequest:
+      type: object
+      properties:
+        id: { type: string }
+        patientId: { type: string }
+        requestSource:
+          type: string
+          enum: [app, whatsapp, email, portal, integration]
+        status:
+          type: string
+          enum: [pending, scheduled, collected, in_lab, completed, cancelled]
+
+    DiagnosticRequestCreate:
+      type: object
+      required: [patientId]
+      properties:
+        patientId: { type: string }
+        doctorId: { type: string }
+        requestSource:
+          type: string
+          enum: [app, whatsapp, email, portal]
+
+    # Samples
+    Sample:
+      type: object
+      properties:
+        id: { type: string }
+        patientId: { type: string }
+        sampleType:
+          type: string
+          enum: [blood, tissue, urine, dna, other]
+        status:
+          type: string
+          enum: [collected, in_transit, delivered, processing, completed, error]
+
+    SampleCreate:
+      type: object
+      required: [patientId, sampleType]
+      properties:
+        patientId: { type: string }
+        sampleType:
+          type: string
+          enum: [blood, tissue, urine, dna, other]
+
+    # Diagnostic Test
+    DiagnosticTest:
+      type: object
+      properties:
+        id: { type: string }
+        diagnosticRequestId: { type: string }
+        testCode: { type: string }
+        testName: { type: string }
+        result: { type: string }
+        resultValue: { type: string }
+        resultUnit: { type: string }
+        resultFlag:
+          type: string
+          enum: [normal, high, low, critical]
+
+    DiagnosticTestUpdate:
+      type: object
+      properties:
+        result: { type: string }
+        resultValue: { type: string }
+        resultUnit: { type: string }
+        resultFlag:
+          type: string
+          enum: [normal, high, low, critical]
+
+    # Notifications
+    Notification:
+      type: object
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        type:
+          type: string
+          enum: [email, sms, whatsapp, push]
+        content: { type: string }
+        status:
+          type: string
+          enum: [pending, sent, failed]
+
+    NotificationCreate:
+      type: object
+      required: [userId, type, content]
+      properties:
+        userId: { type: string }
+        type:
+          type: string
+          enum: [email, sms, whatsapp, push]
+        content: { type: string }
