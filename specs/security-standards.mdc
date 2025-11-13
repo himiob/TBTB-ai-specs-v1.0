@@ -1,0 +1,276 @@
+security-standards.mdc — TBTB Global (v1.0)
+
+(copiar y pegar tal cual)
+
+# Security Standards – TBTB Global (v1.0)
+
+## 1. Objetivo
+
+Definir los lineamientos y controles obligatorios de seguridad para todos los desarrollos, APIs, interfaces, flujos operativos y módulos construidos dentro de TBTB Global, incluyendo aquellos generados parcial o totalmente por herramientas de IA (Cursor, Claude, etc.).
+
+Este documento se basa en buenas prácticas internacionales (OWASP, NIST), principios de privacidad de datos médicos y requerimientos regulatorios aplicables (GDPR, HIPAA-like practices, Habeas Data Colombia).
+
+Todos los proyectos deben cumplir estrictamente con este estándar.
+
+---
+
+## 2. Principios Fundamentales
+
+1. **Minimización de datos**  
+   Solo recolectar y procesar datos estrictamente necesarios.
+
+2. **Zero Trust**  
+   Nunca asumir que un cliente, servicio o componente interno es confiable.
+
+3. **Defense in Depth**  
+   Múltiples capas obligatorias de seguridad en frontend, backend y base de datos.
+
+4. **Privacidad por diseño y por defecto**  
+   Cualquier flujo nuevo debe cumplir con protección de datos desde su concepción.
+
+5. **Principio de mínimo privilegio**  
+   Los servicios, usuarios y roles solo deben tener acceso a lo mínimo indispensable.
+
+6. **Seguridad IA-first**  
+   La IA está obligada a seguir estos estándares y a no generar código inseguro.
+
+---
+
+## 3. Sanitización y Validación de Inputs
+
+Todos los endpoints deben validar y sanitizar:
+
+- parámetros de ruta  
+- query params  
+- body JSON  
+- headers personalizados  
+- archivos subidos  
+- inputs desde frontend  
+
+### Debe prevenir ataques como:
+- SQL Injection  
+- XSS (Cross-site scripting)  
+- CSRF  
+- RCE (Remote Code Execution)  
+- Prototype Pollution  
+- Deserialization Attacks  
+
+### Herramientas obligatorias:
+- `zod`, `joi` o `class-validator` para validar inputs  
+- Sanitización estricta de strings y contenidos HTML  
+- Desinfección de comandos o parámetros sospechosos  
+
+---
+
+## 4. Gestión de Autenticación
+
+### 4.1. Tokens
+- Usar **JWT firmado** con algoritmo fuerte (HS256+ o RS256).
+- Los tokens deben durar lo mínimo necesario.
+- **Prohibido** almacenar JWT en `localStorage`.
+- Solo se permite:
+  - cookies HttpOnly + Secure + SameSite=Strict
+  - o almacenamiento interno en backend
+
+### 4.2. Contraseñas
+- Nunca guardar contraseñas en texto plano.
+- Hash obligatorio:
+  - bcrypt (mínimo cost 10) o
+  - argon2 (preferido)
+
+### 4.3. Multi-Factor Authentication (MFA)
+- Obligatorio para herramientas internas administrativas.
+- Opcional para apps sensibles según proyecto.
+
+---
+
+## 5. Autorización y Control de Acceso
+
+### 5.1. Rol vs Permisos
+- Preferencia por sistema basado en **permisos**, no solo roles.
+- Backend ES la fuente de verdad de accesos.
+
+### 5.2. Regla crítica
+**Ningún frontend debe confiar en permisos enviados por el cliente.  
+Toda autorización ocurre en backend.**
+
+### 5.3. Acceso a datos
+- Usuarios solo pueden ver datos asociados a su rol, país o ámbito definido.
+- Accesos transversales requieren aprobación técnica y de compliance.
+
+---
+
+## 6. Manejo de Datos Sensibles y Médicos
+
+### 6.1. Datos que requieren protección reforzada
+- Información de pacientes  
+- Resultados de pruebas diagnósticas  
+- Datos clínicos  
+- Datos biométricos  
+- Identificadores personales (PII)
+
+### 6.2. Políticas
+- **Nunca incluir datos médicos en logs**, errores o respuestas de debugging.
+- Cifrado obligatorio en tránsito (HTTPS).
+- Cifrado obligatorio en reposo (base de datos o E2E en servicios cloud).
+- No almacenar resultados médicos en dispositivos cliente.
+- Datos sensibles deben estar aislados en tablas o módulos con acceso restringido.
+
+---
+
+## 7. Logs y Auditoría
+
+### 7.1. Regla de oro
+**Prohibido loggear información personal o médica.**
+
+### 7.2. Log permitido
+Puede incluir:
+- ID del usuario  
+- ID del recurso  
+- timestamps  
+- requestId  
+- module  
+- metadata no sensible  
+
+### 7.3. Log prohibido
+- nombres  
+- teléfonos  
+- documentos  
+- correos  
+- biomarcadores  
+- valores médicos  
+- direcciones exactas  
+- errores con stacktrace sin sanitizar  
+
+### 7.4. Auditoría
+Los eventos críticos deben registrarse:
+
+- login / logout  
+- accesos a datos sensibles  
+- creación / modificación de registros médicos  
+- exportación de información  
+
+---
+
+## 8. Seguridad en APIs
+
+### Control obligatorio:
+- Rate limiting básico por IP o API key  
+- Bloqueo temporal por intentos fallidos  
+- Respuestas de error genéricas  
+- No exponer stacktrace ni mensajes internos  
+
+### Reglas API:
+- Validar tamaño máximo de payload  
+- Rechazar Content-Types no esperados  
+- Reglas CORS estrictas — **no usar \***  
+- Proteger endpoints internos y admin
+
+---
+
+## 9. Seguridad en Frontend
+
+### Prohibido:
+- Almacenar tokens en localStorage  
+- Exponer claves internas en el bundle  
+- Enviar datos sensibles en query params  
+- Loggear datos personales en consola  
+- Renderizar información médica sin enmascarar
+
+### Obligatorio:
+- Sanitizar HTML en inputs del usuario  
+- Uso de cookies de sesión seguras  
+- Manejo correcto de rutas protegidas  
+- Controles básicos contra XSS (React hace la mayoría)
+
+---
+
+## 10. Seguridad en Base de Datos
+
+- Cifrar campos sensibles (si aplica)  
+- Usar roles de BD con privilegios mínimos  
+- No usar el mismo usuario de BD para servicios distintos  
+- Segmentar acceso por módulo  
+- Revisar índices y evitar full scans en datos sensibles  
+
+---
+
+## 11. Manejo de Secretos
+
+- Nunca almacenar claves en repositorios  
+- Usar environment variables gestionadas por:
+  - GitHub Actions Secrets  
+  - AWS Secrets Manager  
+  - Vercel / Render environment  
+- Rotación periódica de claves  
+- Accesos a terceros deben estar documentados
+
+---
+
+## 12. Seguridad para Desarrollo con IA
+
+### 12.1. Lo que la IA NO puede hacer
+- Crear endpoints sin autorización  
+- Deshabilitar validaciones  
+- Manipular modelos sin reflejarlo en `api-spec.yml`  
+- Exponer datos sensibles en código o ejemplos  
+- Hardcodear tokens, claves o secretos  
+- Inventar rutas administrativas
+
+### 12.2. Lo que la IA DEBE hacer
+- Cumplir estrictamente este estándar  
+- Alertar sobre código inseguro  
+- Sugerir mitigaciones cuando detecte debilidades  
+- Respetar límites de acceso por módulos  
+- Avisar si una historia implica manipulación de datos sensibles  
+
+---
+
+## 13. Testing de Seguridad
+
+### Obligatorio:
+- Tests para endpoints sensibles  
+- Validación de sanitización  
+- Pruebas con inputs maliciosos  
+- Tests para flujos de autenticación y roles  
+- Validación de permisos backend
+
+### Opcional pero recomendado:
+- Pen testing automatizado  
+- Análisis SAST/DAST  
+- Dependabot + revisión manual de vulnerabilidades  
+
+---
+
+## 14. Gobernanza y Cambios
+
+Para modificar este archivo:
+
+1. Crear un pull request en el repositorio `ai-specs`  
+2. Adjuntar justificación técnica  
+3. Revisar impacto regulatorio  
+4. Aprobación de:
+   - Tech Lead  
+   - Gerente de Tecnología & Data  
+   - CGTO (si involucra datos médicos o privacidad)  
+5. Registrar versión en `CHANGELOG.md`  
+
+---
+
+## 15. Cumplimiento Obligatorio
+
+Este estándar aplica a:
+- backend  
+- frontend  
+- aplicaciones móviles  
+- sistemas de diagnóstico  
+- sistemas de datos  
+- herramientas internas  
+- sistemas automatizados de IA  
+
+Cualquier desviación debe estar explícitamente aprobada y documentada.
+
+---
+
+**Fin del documento — security-standards.mdc (v1.0)**
+
