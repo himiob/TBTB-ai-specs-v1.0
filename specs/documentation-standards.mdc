@@ -1,0 +1,340 @@
+documentation-standards.mdc — TBTB Global (v1.0)
+
+(Copiar y pegar tal cual)
+
+# Documentation Standards – TBTB Global (v1.0)
+
+## 1. Objetivo
+
+Establecer los lineamientos obligatorios de documentación técnica para todos los proyectos de TBTB Global, incluyendo documentación generada por desarrolladores e inteligencia artificial (Cursor, Claude u otras herramientas).
+
+Este estándar asegura que la documentación sea:
+- clara,
+- consistente,
+- actualizada,
+- compatible con IA,
+- alineada a ai-specs,
+- útil para onboarding y mantenimiento técnico.
+
+---
+
+## 2. Principios Fundamentales
+
+1. **Documentación viva**  
+   Toda funcionalidad debe documentarse en el momento de su creación o modificación.
+
+2. **Single Source of Truth (SSOT)**  
+   La documentación oficial del proyecto vive en el repositorio tecnológico del proyecto.
+
+3. **Consistencia sobre estilo personal**  
+   Toda documentación debe seguir formatos estandarizados (plantillas).
+
+4. **IA debe producir documentación estructurada**  
+   Los prompts deben referenciar siempre este archivo para evitar documentación inconsistente.
+
+5. **Claridad sobre cantidad**  
+   Documentación breve y precisa es mejor que documentación larga y confusa.
+
+6. **Actualización obligatoria**  
+   Ningún PR debe ser aprobado si introduce cambios no documentados en:
+   - API  
+   - Modelos  
+   - Arquitectura  
+   - Flujos críticos  
+   - Validaciones  
+   - Seguridad  
+
+---
+
+## 3. Estructura Documental Obligatoria en Todos los Proyectos
+
+Todo proyecto debe incluir como mínimo:
+
+/docs
+api/
+architecture/
+decisions/
+models/
+sequences/
+glossary.md
+README.md
+CHANGELOG.md
+
+### 3.1. Contenido obligatorio
+- **README.md** (nivel proyecto)
+- **API Documentation (OpenAPI/Swagger)**
+- **Architecture Overview**
+- **Data Models**
+- **Decision Records (ADR)**
+- **Glossary corporativo**
+- **Changelog del proyecto**
+
+---
+
+## 4. README Estándar del Proyecto
+
+Todo proyecto debe tener un README con la siguiente estructura:
+
+Nombre del Proyecto
+
+1. Objetivo
+
+Explicación clara y concisa.
+
+2. Alcance
+
+Qué cubre el proyecto y qué no.
+
+3. Arquitectura General
+
+Diagrama + breve resumen.
+
+4. Setup / Instalación
+
+Pasos para ejecutarlo localmente.
+
+5. Scripts de desarrollo
+
+npm run dev
+npm run test
+npm run migration
+
+6. Variables de entorno
+
+Listado (sin valores).
+
+7. Enlaces importantes
+	•	Jira
+	•	Figma
+	•	Confluence o Notion
+	•	API Docs
+	•	Repos relacionados
+
+8. Estructura del proyecto
+
+Explicación partes críticas.
+
+9. Contactos
+
+Responsables técnicos.
+
+---
+
+## 5. Estándares para API Documentation
+
+### 5.1. Formato obligatorio
+Toda API debe documentarse en:
+
+- `api-spec.yml` (OpenAPI 3.0)
+- `/docs/api` en formato Swagger o Redoc
+
+### 5.2. Cada endpoint debe incluir:
+- Método (GET/POST/PUT/PATCH/DELETE)
+- Descripción clara
+- Parámetros
+- Request body
+- Response body (success/error)
+- Códigos de estado HTTP
+- Validaciones
+- Roles/Permisos requeridos
+- Posibles errores
+
+### 5.3. Prohibido:
+- Endpoints no documentados
+- Respuestas parciales o ambiguas
+- Incluir valores sensibles en ejemplos
+
+---
+
+## 6. Arquitectura (Architecture Overview)
+
+### 6.1. Documentación mínima obligatoria
+- Diagrama de arquitectura general
+- Diagrama de módulos
+- Relación entre módulos
+- Flujo de datos
+- Dependencias externas
+- Eventos o colas (si existen)
+
+### 6.2. Debe estar dentro de:
+
+/docs/architecture/architecture-overview.md
+
+### 6.3. Cada cambio mayor en arquitectura requiere:
+- actualización en `architecture-overview.md`
+- nueva entrada en `CHANGELOG.md`
+- notificación a líderes técnicos
+
+---
+
+## 7. Modelos de Datos (Data Model Documentation)
+
+Toda entidad o modelo debe estar documentado en:
+
+/docs/models/data-model.md
+
+Debe incluir:
+- definición de entidades
+- relaciones entre entidades
+- llaves primarias y foráneas
+- ejemplos JSON
+- restricciones
+- validaciones
+- reglas de negocio asociadas al modelo
+
+### Prohibido:
+- modelos no documentados
+- entidades huérfanas sin explicación
+- cambios en BD sin actualización documental
+
+---
+
+## 8. Decision Records – ADR (Architecture Decision Records)
+
+Cada decisión técnica significativa debe registrarse en:
+
+/docs/decisions/ADR-XXXX-decision-title.md
+
+Formato:
+
+ADR-XXXX: Título
+
+Contexto
+
+Explicar el problema.
+
+Decisión
+
+Explicar la solución tomada.
+
+Alternativas evaluadas
+
+Opción A
+Opción B
+Opción C
+
+Consecuencias
+
+Impacto y compensaciones.
+
+Estado
+
+Aceptada / Reemplazada / Obsoleta
+
+---
+
+## 9. Documentación de Historias IA-first
+
+Toda historia debe incluir:
+
+- Contexto para IA  
+- Alcance y exclusiones  
+- Criterios de aceptación  
+- Diseño asociado  
+- Prompt técnico para IA  
+- Plan técnico generado por IA (en `/changes`)  
+- Impacto técnico en:
+  - API  
+  - Modelos  
+  - Arquitectura  
+  - Seguridad  
+
+### Nota:
+Los planes técnicos generados por IA deben ser almacenados como documentación viva en:
+
+/ai-specs/changes/SCRUM-XXX-plan.md
+
+---
+
+## 10. Documentación de Seguridad (Security)
+
+Debe incluir:
+
+- Amenazas relevantes  
+- Validaciones requeridas  
+- Permisos/roles  
+- Flujos de autenticación  
+- Gestión de tokens y cookies  
+- Datos sensibles manejados  
+- Controles de acceso  
+
+Todo proyecto debe revisar este estándar junto con:
+- `security-standards.mdc`
+- `risks.mdc`
+
+---
+
+## 11. Documentación Generada por IA
+
+### 11.1. Obligatorio
+- IA debe generar documentación clara, estructurada.
+- IA debe evitar ambigüedades o inconsistencias.
+- IA debe basarse en ai-specs.
+
+### 11.2. Prohibido
+- Documentación contradictoria
+- Documentación incompleta
+- Documentación generada sin contexto suficiente
+
+---
+
+## 12. Changelog – Control de Versiones Documental
+
+Debe existir un archivo:
+
+CHANGELOG.md
+
+Estructura:
+
+[1.0.5] – 2025-02-10
+
+Añadido
+
+Modificado
+
+Eliminado
+
+Corregido
+
+Toda versión nueva debe incluir:
+- cambios realizados  
+- responsables  
+- fecha  
+
+---
+
+## 13. Gobernanza y Cambios
+
+Cualquier modificación a este archivo requiere:
+
+1. Crear un PR en el repositorio ai-specs  
+2. Justificar el cambio  
+3. Revisar impacto en:
+   - documentación de backend  
+   - documentación de frontend  
+   - documentación de IA  
+   - API  
+   - seguridad  
+4. Aprobación del Tech Lead  
+5. Aprobación de la Gerente de Tecnología & Data  
+6. Actualización de `CHANGELOG.md`
+
+---
+
+## 14. Cumplimiento Obligatorio
+
+Este estándar aplica a:
+
+- Backend  
+- Frontend  
+- Mobile  
+- Sistemas internos  
+- Plataformas diagnósticas  
+- Desarrollo IA-first  
+
+Cualquier excepción debe ser autorizada formalmente y documentada.
+
+---
+
+**Fin del documento — documentation-standards.mdc (v1.0)**
+
