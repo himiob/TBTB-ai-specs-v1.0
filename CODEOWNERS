@@ -1,0 +1,18 @@
+# TBTB Global – AI-SPECS Governance
+
+# Todo el contenido dentro de /specs solo puede ser modificado vía PR revisado por:
+# - Rodrigo Marcano (CTOO)
+# - Andreina Méndez (Gerente Tech & Data)
+
+specs/* @himiob @Andreina-Mendez
+
+# Proteger configuración de IA
+/.cursorrules @himiob @Andreina-Mendez
+/CLAUDE.md @himiob @Andreina-Mendez
+/prompts.md @himiob @Andreina-Mendez
+
+# CHANGELOG debe ser aprobado también
+/CHANGELOG.md @himiob @Andreina-Mendez
+
+# Carpeta de planes técnicos puede ser editada por cualquier desarrollador vía PR
+ai-specs/changes/* @himiob @Andreina-Mendez
