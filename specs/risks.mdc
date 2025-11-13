@@ -1,0 +1,323 @@
+# AI-First Development Risks – TBTB Global (v1.0)
+
+## 1. Objetivo
+
+Identificar, documentar y mitigar los principales riesgos asociados al desarrollo asistido por Inteligencia Artificial (IA) dentro de TBTB Global.
+
+Este documento es obligatorio para todos los desarrolladores, Tech Leads y revisores de PR, y es consumido por herramientas IA (Cursor, Claude, etc.) para evitar errores críticos.
+
+La IA debe usar este documento como referencia para validar seguridad, arquitectura y consistencia antes de generar o modificar código.
+
+---
+
+## 2. Categorías de Riesgos
+
+1. **Riesgos Arquitectónicos**
+2. **Riesgos de Seguridad**
+3. **Riesgos de Datos Sensibles**
+4. **Riesgos de API & Contratos**
+5. **Riesgos de Modelo de Datos**
+6. **Riesgos Funcionales**
+7. **Riesgos de Frontend & UI**
+8. **Riesgos de Integración**
+9. **Riesgos de Documentación**
+10. **Riesgos de Refactor o Deuda Técnica**
+11. **Riesgos IA (Alucinaciones y Fuzziness)**
+12. **Riesgos Operativos**
+13. **Riesgos Legales y de Compliance**
+
+Cada riesgo incluye:
+- descripción  
+- señal de alerta  
+- impacto  
+- mitigación corporativa  
+
+---
+
+# 3. Riesgos Arquitectónicos
+
+## 3.1. La IA genera estructuras nuevas que NO existen  
+**Riesgo:**  
+La IA inventa carpetas, módulos, funciones o capas no aprobadas.
+
+**Alertas:**  
+- carpetas nuevas sin justificación  
+- cambios no reflejados en `architecture-overview.md`  
+- servicios duplicados  
+
+**Impacto:**  
+- incoherencia en arquitectura  
+- repos difícil de mantener  
+
+**Mitigación:**  
+- ver `architecture-overview.md`  
+- nunca aceptar arquitectura inventada  
+- siempre alinear con plan técnico  
+
+---
+
+## 3.2. Acoplamiento entre módulos  
+La IA puede mezclar dominios:
+
+Ej: `patients` usando directamente código de `samples`.
+
+**Mitigación:**  
+- revisar dependencias  
+- permitir comunicación solo vía servicios/mappers  
+
+---
+
+# 4. Riesgos de Seguridad
+
+### 4.1. Exposición de datos sensibles (PII / PHI)
+La IA puede incluir campos sensibles en:
+
+- logs  
+- respuestas API  
+- mensajes de error  
+
+**Mitigación:**  
+- ver `security-standards.mdc`  
+- anonimizar  
+- nunca loggear datos médicos  
+
+---
+
+### 4.2. Tokens mal manejados
+La IA puede sugerir:
+
+- almacenar JWT en localStorage  
+- enviar tokens por query params  
+- exponer tokens en logs  
+
+**Impacto:** Crítico.  
+**Mitigación:** Solo cookies HttpOnly.  
+
+---
+
+### 4.3. Falta de validación/sanitización
+IA omite validaciones o sanitiza incompleto.
+
+**Mitigación:**  
+- usar Zod / Class Validator  
+- bloquear PR sin validación  
+
+---
+
+# 5. Riesgos de Datos
+
+## 5.1. Mal diseño de entidades  
+La IA puede:
+- duplicar modelos  
+- inventar campos  
+- omitir relaciones  
+- romper el esquema oficial  
+
+**Mitigación:**  
+Ver `data-model.md`.  
+Rechazar entidades no aprobadas.
+
+---
+
+## 5.2. Pérdida de integridad referencial  
+**Mitigación:**  
+- usar FKs correctamente  
+- revisar cascade deletes  
+
+---
+
+# 6. Riesgos de API y Contratos
+
+### 6.1. Endpoints inventados por IA  
+La IA crea rutas inexistentes.
+
+**Mitigación:**  
+- backend SIEMPRE se basa en `api-spec.yml`  
+- rechazar endpoints no especificados  
+
+---
+
+### 6.2. Cambios en API sin actualizar OpenAPI  
+Impacto: quebrar frontend y automatizaciones.
+
+**Mitigación:**  
+PR bloqueado si no se actualiza `api-spec.yml`.
+
+---
+
+### 6.3. Respuestas inconsistentes  
+Ej: `data` a veces es array, a veces objeto.
+
+**Mitigación:**  
+- usar `ApiResponse` estándar  
+- validar con tests  
+
+---
+
+# 7. Riesgos Funcionales
+
+### 7.1. La IA interpreta mal la historia  
+Causas:
+- falta de contexto  
+- exclusiones ignoradas  
+
+**Mitigación:**  
+HU IA completa y revisada.  
+Validación humana obligatoria.
+
+---
+
+# 8. Riesgos de Frontend
+
+### 8.1. Hardcoding de estilos  
+La IA puede inventar:
+
+- colores  
+- tamaños  
+- estilos no existentes en el Design System  
+
+**Mitigación:**  
+Ver `frontend-standards.mdc`.
+
+---
+
+### 8.2. Componentes no alineados con Figma  
+**Mitigación:**  
+Uso obligatorio de Figma Dev Mode.
+
+---
+
+# 9. Riesgos de Integración
+
+### 9.1. La IA inventa estructuras de request/response de terceros  
+**Mitigación:**  
+- siempre verificar documentación oficial  
+- nunca asumir sin validar  
+
+---
+
+# 10. Riesgos de Documentación
+
+### 10.1. Documentación generada por IA no coincide con el código  
+**Mitigación:**  
+PR bloqueado si no se alinea.
+
+---
+
+# 11. Riesgos de Refactorización
+
+### 11.1. La IA refactoriza pero rompe funciones existentes  
+Por ejemplo:
+- cambia nombres  
+- cambia firmas  
+- altera comportamiento  
+
+**Mitigación:**  
+- usar `refactor-plan.mdc`  
+- tests obligatorios  
+
+---
+
+# 12. Riesgos IA (Alucinaciones y Fuzziness)
+
+Estos son los riesgos más comunes:
+
+---
+
+### 12.1. Alucinación estructural  
+La IA crea cosas que no existen.
+
+**Mitigación:**  
+- repetir: “No inventes nuevas estructuras”  
+- usar ai-specs  
+
+---
+
+### 12.2. Fuzziness o ambigüedad  
+La IA genera código funcional pero incompleto.
+
+**Mitigación:**  
+- pedirle verificar casos borde  
+- usar prompts de análisis técnico  
+
+---
+
+### 12.3. Inconsistencias entre mensajes  
+La IA da respuestas diferentes en diferentes momentos.
+
+**Mitigación:**  
+Siempre pedirle citar archivos y razones.
+
+---
+
+### 12.4. Asumir detalles no especificados  
+Mitigación: revisar HU IA / exclusiones.
+
+---
+
+# 13. Riesgos Operativos
+
+### 13.1. Falta de trazabilidad  
+La IA no documenta pasos.
+
+Mitigación: documentación obligatoria en `/changes`.
+
+---
+
+### 13.2. Mal uso de branching  
+Mitigación: ver `development_guide.md`.
+
+---
+
+# 14. Riesgos Legales / Compliance
+
+### 14.1. Manejo incorrecto de datos médicos  
+**Impacto:** crítico.
+
+Mitigación:
+- anonimizar  
+- no loggear  
+- no exponer  
+
+---
+
+### 14.2. Historial auditado incorrectamente  
+Mitigación: `AuditLog` obligatorio.
+
+---
+
+# 15. Matriz de Riesgos (Resumen)
+
+| Categoría | Riesgo | Severidad | Mitigación |
+|----------|--------|-----------|------------|
+| Arquitectura | Estructuras nuevas | Alta | architecture-overview |
+| Seguridad | Exposición PII/PHI | Crítica | security-standards |
+| API | Endpoints inventados | Alta | api-spec.yml |
+| Data | Inconsistencia modelos | Alta | data-model.md |
+| Funcional | Interpretación errónea IA | Media | HU IA |
+| Frontend | Hardcoding estilos | Alta | DS + frontend-standards |
+| Refactor | Ruptura funciones | Alta | refactor-plan |
+| Documentación | No actualización | Media | development_guide |
+| IA | Alucinaciones | Alta | prompts oficiales |
+
+---
+
+# 16. Gobernanza
+
+Toda detección de riesgo debe reflejarse en:
+
+- comentarios de PR  
+- modificaciones del plan técnico  
+- actualizaciones a ai-specs si aplica  
+
+Cambios en este documento requieren:
+
+1. PR en ai-specs  
+2. Justificación técnica  
+3. Aprobación del Tech Lead  
+4. Aprobación de Gerente Tech & Data  
+5. Actualización del CHANGELOG  
+
+---
+
+**Fin del documento — risks.mdc (v1.0)**
