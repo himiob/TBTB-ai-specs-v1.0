@@ -4,15 +4,15 @@
 # - Rodrigo Marcano (CTOO)
 # - Andreina Méndez (Gerente Tech & Data)
 
-specs/* @himiob @Andreina-Mendez
+specs/* @himiob @AMendezTBTB
 
 # Proteger configuración de IA
-/.cursorrules @himiob @Andreina-Mendez
-/CLAUDE.md @himiob @Andreina-Mendez
-/prompts.md @himiob @Andreina-Mendez
+/.cursorrules @himiob @AMendezTBTB
+/CLAUDE.md @himiob @AMendezTBTB
+/prompts.md @himiob @AMendezTBTB
 
 # CHANGELOG debe ser aprobado también
-/CHANGELOG.md @himiob @Andreina-Mendez
+/CHANGELOG.md @himiob @AMendezTBTB
 
 # Carpeta de planes técnicos puede ser editada por cualquier desarrollador vía PR
-ai-specs/changes/* @himiob @Andreina-Mendez
+ai-specs/changes/* @himiob @AMendezTBTB
